@@ -1,0 +1,32 @@
+name: Nightly Tariff Auto-Update
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Execute Rates Generator Script
+        run: python update_rates.py
+
+      - name: Commit and Push Updated plans.json
+        run: |
+          git config --global user.name "LuzAhorro AutoBot"
+          git config --global user.email "bot@luzahorro.com"
+          git add plans.json
+          git commit -m "Auto-update market tariffs [skip ci]" || exit 0
+          git push
